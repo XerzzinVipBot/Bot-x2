@@ -1,14 +1,57 @@
 const { SlashCommandBuilder, ChannelType, PermissionFlagsBits, EmbedBuilder } = require('discord.js');
 
+const NAMED_COLORS = {
+  rojo: '#ff0000',
+  red: '#ff0000',
+  naranja: '#ff7f11',
+  orange: '#ff7f11',
+  amarillo: '#ffda0a',
+  yellow: '#ffda0a',
+  verde: '#22c55e',
+  green: '#22c55e',
+  azul: '#1d4ed8',
+  blue: '#1d4ed8',
+  celeste: '#0ea5e9',
+  cyan: '#0ea5e9',
+  turquesa: '#14b8a6',
+  morado: '#7c3aed',
+  purple: '#7c3aed',
+  violeta: '#7c3aed',
+  rosa: '#ec4899',
+  pink: '#ec4899',
+  negro: '#111827',
+  black: '#111827',
+  gris: '#6b7280',
+  gray: '#6b7280',
+  grisoscuro: '#374151',
+  blanco: '#f9fafb',
+  white: '#f9fafb',
+};
+
+function normalizeText(value) {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/\s+/g, '')
+    .toLowerCase();
+}
+
 function parseColor(input) {
   if (!input) return null;
-  const normalized = input.trim().replace(/^0x/i, '#');
-  if (!normalized.startsWith('#')) return null;
-  const hex = normalized.slice(1);
-  if (![3, 6].includes(hex.length) || !/^[0-9a-f]+$/i.test(hex)) {
+
+  const trimmed = input.trim();
+  const hexCandidate = trimmed.replace(/^0x/i, '#');
+
+  if (hexCandidate.startsWith('#')) {
+    const hex = hexCandidate.slice(1);
+    if ([3, 6].includes(hex.length) && /^[0-9a-f]+$/i.test(hex)) {
+      return `#${hex.length === 3 ? hex.split('').map((c) => c + c).join('') : hex}`;
+    }
     return null;
   }
-  return `#${hex.length === 3 ? hex.split('').map((c) => c + c).join('') : hex}`;
+
+  const normalized = normalizeText(trimmed);
+  return NAMED_COLORS[normalized] ?? null;
 }
 
 const command = new SlashCommandBuilder()
@@ -26,7 +69,7 @@ const command = new SlashCommandBuilder()
   .addStringOption((option) =>
     option
       .setName('color')
-      .setDescription('Color en formato hex (ejemplo: #5865F2)')
+      .setDescription('Color (hex como #5865F2 o nombre: rojo, azul, amarillo, etc.)')
       .setRequired(false)
   )
   .addStringOption((option) =>
@@ -74,7 +117,9 @@ async function execute(interaction) {
     if (colorRaw) {
       const colorValue = parseColor(colorRaw);
       if (!colorValue) {
-        await interaction.editReply('El color debe ser un valor hex válido (por ejemplo, #5865F2).');
+        await interaction.editReply(
+          'El color debe ser un valor hex válido (por ejemplo, #5865F2) o uno de: rojo, naranja, amarillo, verde, azul, celeste, turquesa, morado, rosa, negro, gris, blanco.'
+        );
         return;
       }
       embed.setColor(colorValue);
