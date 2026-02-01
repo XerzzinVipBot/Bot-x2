@@ -35,6 +35,8 @@ async function startBot() {
 client.once('ready', async (readyClient) => {
   console.log(`Logged in as ${readyClient.user.tag}`);
 
+  await startBot();
+
   // Set presence to "Jugando a 𝐗𝐄𝐑𝐙𝐙𝐈𝐍 𝐕𝐈𝐏"
   readyClient.user.setPresence({
     activities: [
