@@ -4,3 +4,13 @@ transcripts/
 sounds/
 
 /generated/prisma
+node_modules
+.env
+dist
+build
+logs
+*.log
+.DS_Store
+.vscode
+.idea
+coverage
